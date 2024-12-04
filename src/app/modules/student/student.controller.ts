@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StudentServices } from './student.service';
 import { error } from 'console';
 import studentJoiValidationSchema from './student.joiValidation';
@@ -7,7 +7,7 @@ import studentValidationSchema from './student.zod.validatoion';
 
 
 
-const getAllStudent = async (req: Request, res: Response) => {
+const getAllStudent = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const result = await StudentServices.getAllStudentFromDB();
     res.status(200).json({
@@ -15,16 +15,12 @@ const getAllStudent = async (req: Request, res: Response) => {
       messsage: 'Student retrieve successfully',
       data: result,
     });
-  } catch (err:any) {
-    res.status(500).json({
-      success: false,
-      messsage: err.message || 'something went wrong fff',
-      error: err,
-    });
+  } catch (err) {
+    next(err)
   }
 };
 
-const getSingleStudent = async (req: Request, res: Response) => {
+const getSingleStudent = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const { studentId } = req.params;
     const result = await StudentServices.getSingleStudentFromDB(studentId);
@@ -34,14 +30,10 @@ const getSingleStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err:any) {
-    res.status(500).json({
-      success: false,
-      messsage: err.message || 'something went wrong fff',
-      error: err,
-    });
+    next(err)
   }
 };
-const deleteStudent = async (req: Request, res: Response) => {
+const deleteStudent = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const { studentId } = req.params;
     const result = await StudentServices.deleteStudentFromDB(studentId);
@@ -51,11 +43,7 @@ const deleteStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err:any) {
-    res.status(500).json({
-      success: false,
-      messsage: err.message || 'something went wrong fff',
-      error: err,
-    });
+    next(err)
   }
 };
 export const StudentController = {

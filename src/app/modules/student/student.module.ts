@@ -8,9 +8,8 @@ import {
   TUserName,
 } from './student.interface';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
-import config from '../../config';
-import { boolean } from 'joi';
+
+
 // Define the UserName schema
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -101,12 +100,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>(
       unique:true,
       ref:'User'
     },
-    password: {
-      type: String,
-      required: [true, 'password  is required.'],
-
-      maxlength: [20, 'password cannot be more than 20 character'],
-    },
+    
     name: {
       type: userNameSchema,
       required: [true, "Student's name is required."],
@@ -185,21 +179,7 @@ studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName}  ${this.name.lastName} `;
 });
 
-//pre save middleware / hook: will work create() or save() // document middleware
-studentSchema.pre('save', async function (next) {
-  // console.log(this,'pre hook: will save data')
-  const user = this;
-  //hashing password and save into data
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_solt_rounds),
-  );
-  next();
-});
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
+
 
 // query middleware
 studentSchema.pre('find', function (next) {

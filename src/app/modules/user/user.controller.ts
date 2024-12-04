@@ -1,7 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserServices } from "./user.service";
+import sendResponse from "../../utils/sendResponse";
 
-const createStudent = async (req: Request, res: Response) => {
+const createStudent = async (req: Request, res: Response, next:NextFunction) => {
   try {
     //using joi
     // const {error, value} = studentJoiValidationSchema.validate(studentData)
@@ -12,7 +13,6 @@ const createStudent = async (req: Request, res: Response) => {
     const {password, student: studentData } = req.body;
     //data validation using zod
     // const zodParseData = studentValidationSchema.parse(studentData)
-
     const result = await UserServices.createStudentIntoDB(password,studentData);
     //  if(error){
     // 	res.status(500).json({
@@ -24,17 +24,14 @@ const createStudent = async (req: Request, res: Response) => {
     //  }
     //will call service func to send this data
     // send response
-    res.status(200).json({
+    sendResponse(res,{
+      statusCode: 200,
       success: true,
-      messsage: 'Student is created successfully',
-      data: result,
-    });
+      message: "student is created successfully",
+      data: result
+    })
   } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      messsage: err.message || 'something went wrong fff',
-      error: err,
-    });
+    next(err)
   }
 };
 
