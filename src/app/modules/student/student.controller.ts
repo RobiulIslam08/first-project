@@ -1,27 +1,26 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { StudentServices } from './student.service';
 import { error } from 'console';
 import studentJoiValidationSchema from './student.joiValidation';
 import studentValidationSchema from './student.zod.validatoion';
+import catchAsync from '../../utils/catchAsync';
 
 
 
 
-const getAllStudent = async (req: Request, res: Response, next:NextFunction) => {
-  try {
+const getAllStudent = catchAsync(async (req: Request, res: Response) => {
+ 
     const result = await StudentServices.getAllStudentFromDB();
     res.status(200).json({
       success: true,
       messsage: 'Student retrieve successfully',
       data: result,
     });
-  } catch (err) {
-    next(err)
-  }
-};
+  
+});
 
-const getSingleStudent = async (req: Request, res: Response, next:NextFunction) => {
-  try {
+const getSingleStudent = catchAsync(async (req: Request, res: Response) => {
+
     const { studentId } = req.params;
     const result = await StudentServices.getSingleStudentFromDB(studentId);
     res.status(200).json({
@@ -29,12 +28,10 @@ const getSingleStudent = async (req: Request, res: Response, next:NextFunction) 
       messsage: 'Single student get successfully',
       data: result,
     });
-  } catch (err:any) {
-    next(err)
-  }
-};
-const deleteStudent = async (req: Request, res: Response, next:NextFunction) => {
-  try {
+
+})
+const deleteStudent = catchAsync(async (req: Request, res: Response) => {
+
     const { studentId } = req.params;
     const result = await StudentServices.deleteStudentFromDB(studentId);
     res.status(200).json({
@@ -42,10 +39,8 @@ const deleteStudent = async (req: Request, res: Response, next:NextFunction) => 
       messsage: 'delete student  successfully',
       data: result,
     });
-  } catch (err:any) {
-    next(err)
-  }
-};
+
+});
 export const StudentController = {
 
   getAllStudent,
