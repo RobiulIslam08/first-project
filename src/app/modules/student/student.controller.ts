@@ -1,8 +1,6 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
+import {  Request,  Response } from 'express';
 import { StudentServices } from './student.service';
-import { error } from 'console';
-import studentJoiValidationSchema from './student.joiValidation';
-import studentValidationSchema from './student.zod.validatoion';
+
 import catchAsync from '../../utils/catchAsync';
 
 
