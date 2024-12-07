@@ -11,6 +11,7 @@ const sendResponse = <T>(res:Response,data:TResponse<T>) =>{
 		statuscode:200,
 		success:data.success,
 		messsage:data.message,
+		data:data.data
 
 	})
 }
