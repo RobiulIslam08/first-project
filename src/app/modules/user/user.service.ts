@@ -1,11 +1,13 @@
 import config from "../../config";
+import { AcademicSemester } from "../academicSemester/academicSemester.model";
 import { TStudent } from "../student/student.interface";
 import { Student } from "../student/student.module";
 import { TUser } from "./user.interface";
 
 import { User } from "./user.model";
+import { generateStudentId } from "./user.utils";
 
-const createStudentIntoDB = async (password:string,studentData: TStudent) => {
+const createStudentIntoDB = async (password:string,payload: TStudent) => {
 	// const result = await StudentModel.create(student);  // built in static method
 	// return result;
 	// const student = new Student(studentData); // create custom instance m-9.6
@@ -22,8 +24,12 @@ const createStudentIntoDB = async (password:string,studentData: TStudent) => {
 	//set student role
 	userData.role = 'student'
 
+
+	//find academic semester info 
+	const admissionSemester = await AcademicSemester.findById(payload.admissionSemester)
+
 	//set manually generated id
-	userData.id = '20301000001'
+	userData.id = generateStudentId(admissionSemester) 
 	
 	//create user
 	const newUser = await User.create(userData)
@@ -31,9 +37,9 @@ const createStudentIntoDB = async (password:string,studentData: TStudent) => {
 	//create a student 
 	if(Object.keys(newUser).length){
 		//set id, _id as user
-		studentData.id = newUser.id   // embeded id
-		studentData.user = newUser._id  // referance id
-		const newStudent = await Student.create(studentData)
+		payload.id = newUser.id   // embeded id
+		payload.user = newUser._id  // referance id
+		const newStudent = await Student.create(payload)
 		return newStudent
 	}
 

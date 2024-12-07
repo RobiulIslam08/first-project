@@ -157,6 +157,10 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>(
     profileImg: {
       type: String,
     },
+    admissionSemester:{
+      type:Schema.Types.ObjectId,
+      ref:'AcademicSemester'
+    }
     
     
   },
@@ -168,9 +172,9 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>(
 );
 
 //virtual
-studentSchema.virtual('fullName').get(function () {
-  return `${this.name.firstName} ${this.name.middleName}  ${this.name.lastName} `;
-});
+// studentSchema.virtual('fullName').get(function () {
+//   return `${this.name.firstName} ${this.name.middleName}  ${this.name.lastName} `;
+// });
 
 
 
