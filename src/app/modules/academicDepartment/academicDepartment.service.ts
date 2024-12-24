@@ -26,7 +26,7 @@ const updateAcademicDepartmentIntoDB = async (id:string, payload:Partial<TAcadem
 	
 	return result
 }
-export const AcademicFacultyServices = {
+export const AcademicDepartmentServices = {
     createAcademicDepartmentIntoDB,
     getAllAcademicDepartmentFromDB,
     getSingleAcademicDepartmentFromDB,
