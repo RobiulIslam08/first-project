@@ -45,7 +45,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 	  return newStudent[0]; // প্রথম ডকুমেন্ট রিটার্ন করুন
 	} catch (error) {
 	  await session.abortTransaction(); // কোনো এরর হলে রোলব্যাক করুন
-	  throw error; // এরর থ্রো করুন
+	  throw new Error('failed to create student'); // এরর থ্রো করুন
 	} finally {
 	  await session.endSession(); // সেশন বন্ধ করুন
 	}
