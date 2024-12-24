@@ -8,10 +8,11 @@ const AcademicDepartmentSchema = new Schema<TAcademicDepartment>(
       required: true,
       unique: true,
     },
-    academicFaculty: {
-      type: Schema.Types.ObjectId,
-      ref: 'AcademicFaculty',
-    },
+	academicFaculty: {
+		type: Schema.Types.ObjectId,
+		ref: 'AcademicFaculty', // Matches AcademicFaculty model
+		required: true,
+	  },
   },
   {
     timestamps: true,
