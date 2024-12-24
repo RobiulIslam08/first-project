@@ -10,58 +10,47 @@ import { generateStudentId } from './user.utils';
 import AppError from '../../errors/AppError';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
-	
-  // const result = await StudentModel.create(student);  // built in static method
-  // return result;
-  // const student = new Student(studentData); // create custom instance m-9.6
-
-  // if (await student.isUserExists(studentData.id)) {
-  //   throw new Error('user already exists');
-  // }
-
-  //create a user object
-  const userData: Partial<TUser> = {};
-  userData.password = password || (config.default_pass as string);
-
-  //set student role
-  userData.role = 'student';
-
-  //find academic semester info
-  const admissionSemester = await AcademicSemester.findById(
-    payload.admissionSemester,
-  );
-
-  const session = await mongoose.startSession() // session create for  transaction 
-  try {
-	session.startTransaction() // transaction start
-    //set manually generated id
-    userData.id = await generateStudentId(admissionSemester!);
-
-    //create user = [transation -1]
-    const newUser = await User.create([userData], {session}); // transaction এর ক্ষেত্রে ডাটা array তে করে পাঠাতে হয়, এবং  paremeter দুইটা নেয়
-
-    //create a student
-    if (!newUser.length) {
-      //set id, _id as user
-     throw new AppError(status.BAD_REQUEST,'Failed to create user')
-    }
-
-	payload.id = newUser[0].id; // embeded id
-	payload.user = newUser[0]._id; // referance id
-
-	//create a student [transaction - 2]
-	const newStudent = await Student.create([payload],{session});
-	if(!newStudent.length){
-		throw new AppError(status.BAD_REQUEST,'Failed to create student')
+	const userData: Partial<TUser> = {};
+	userData.password = password || (config.default_pass as string);
+	userData.role = 'student';
+  
+	const admissionSemester = await AcademicSemester.findById(
+	  payload.admissionSemester,
+	);
+  
+	const session = await mongoose.startSession(); // সেশন তৈরি
+	try {
+	  session.startTransaction(); // ট্রানজেকশন শুরু
+  
+	  // ম্যানুয়ালি আইডি জেনারেট করা
+	  userData.id = await generateStudentId(admissionSemester!);
+  
+	  // ইউজার তৈরি [ট্রানজেকশন - ১]
+	  const newUser = await User.create([userData], { session });
+	  if (!newUser.length) {
+		throw new AppError(status.BAD_REQUEST, 'Failed to create user');
+	  }
+  
+	  // স্টুডেন্টের জন্য রেফারেন্স সেট করা
+	  payload.id = newUser[0].id; // অ্যারে থেকে প্রথম আইটেম
+	  payload.user = newUser[0]._id;
+  
+	  // স্টুডেন্ট তৈরি [ট্রানজেকশন - ২]
+	  const newStudent = await Student.create([payload], { session });
+	  if (!newStudent.length) {
+		throw new AppError(status.BAD_REQUEST, 'Failed to create student');
+	  }
+  
+	  await session.commitTransaction(); // সফল হলে ট্রানজেকশন সম্পন্ন করুন
+	  return newStudent[0]; // প্রথম ডকুমেন্ট রিটার্ন করুন
+	} catch (error) {
+	  await session.abortTransaction(); // কোনো এরর হলে রোলব্যাক করুন
+	  throw error; // এরর থ্রো করুন
+	} finally {
+	  await session.endSession(); // সেশন বন্ধ করুন
 	}
-	session.commitTransaction();
-	session.endSession()
-	return newStudent;
-  } catch (error) {
-	await session.abortTransaction();
-	await session.endSession()
-  }
-};
+  };
+  
 export const UserServices = {
   createStudentIntoDB,
 };
