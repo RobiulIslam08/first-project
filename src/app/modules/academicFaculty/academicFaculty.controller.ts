@@ -1,7 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AcademicFacultyServices } from "./academicFaculty.service";
-
+import status from "http-status";
 
 const createAcademicFaculty  = catchAsync(async (req, res) => {
 
@@ -21,7 +21,7 @@ const getAllAcademicFaculty = catchAsync(async (req, res) => {
   const result = await AcademicFacultyServices.getAllAcademicFacultiesFromDB();
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: status.OK,
     success: true,
     message: 'Academic faculty are retrieved successfully',
     data: result,
@@ -31,7 +31,7 @@ const getSingleAcademicFaculty = catchAsync(async(req, res)=>{
 	const {facultyId} = req.params
   const result = await AcademicFacultyServices.getSingleAcademicFacultyFromDB(facultyId)
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: status.OK,
     success: true,
     message: 'Single Academic faculty are retrieved successfully',
     data: result,
@@ -42,14 +42,14 @@ const updateAcademicFaculty = catchAsync(async(req, res)=>{
   const result = await AcademicFacultyServices.updateAcademicFacultyIntoDB(facultyId, req.body)
   
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: status.OK,
     success: true,
     message: ' Academic faculty are updated successfully',
     data: result,
   });
 })
 
-export const AcademicSemesterController = {
+export const AcademicFacultyController = {
   createAcademicFaculty,
   getAllAcademicFaculty,
   getSingleAcademicFaculty,
