@@ -3,7 +3,7 @@ import { TStudent } from './student.interface';
 import path from 'path';
 import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
-import status from "http-status";
+import status from 'http-status';
 import { User } from '../user/user.model';
 const getAllStudentFromDB = async () => {
   const result = await Student.find()
@@ -31,9 +31,8 @@ const getSingleStudentFromDB = async (studentId: string) => {
   return result;
 };
 const deleteStudentFromDB = async (studentId: string) => {
-
   //transaction session start
-  const session = await mongoose.startSession()
+  const session = await mongoose.startSession();
   try {
     //transaction start
     session.startTransaction();
@@ -42,22 +41,22 @@ const deleteStudentFromDB = async (studentId: string) => {
     const deletedStudent = await Student.findOneAndUpdate(
       { id: studentId },
       { isDeleted: true },
-      {new:true, session}
+      { new: true, session },
     );
 
-    if(!deletedStudent){
-      throw new AppError(status.BAD_REQUEST,' failed to delete student')
+    if (!deletedStudent) {
+      throw new AppError(status.BAD_REQUEST, ' failed to delete student');
     }
 
     //transaction -2
     const deletedUser = await User.findOneAndUpdate(
       { id: studentId },
       { isDeleted: true },
-      {new:true, session}
+      { new: true, session },
     );
 
-    if(!deletedUser){
-      throw new AppError(status.BAD_REQUEST,' failed to delete user')
+    if (!deletedUser) {
+      throw new AppError(status.BAD_REQUEST, ' failed to delete user');
     }
 
     await session.commitTransaction();
@@ -65,11 +64,19 @@ const deleteStudentFromDB = async (studentId: string) => {
     return deletedStudent;
   } catch (error) {
     await session.abortTransaction();
-    await session.endSession()
+    await session.endSession();
   }
+};
+const updateStudentIntoDB = async (id: string,payload:Partial<TStudent>) => {
+  const result = await Student.findOneAndUpdate({id},payload, {
+    new: true, // Return the updated document
+   
+  })
+  return result
 };
 export const StudentServices = {
   getAllStudentFromDB,
   getSingleStudentFromDB,
   deleteStudentFromDB,
+  updateStudentIntoDB,
 };
