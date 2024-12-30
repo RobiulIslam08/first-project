@@ -6,6 +6,7 @@ import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
+import AppError from '../errors/AppError';
 
 const globalErrorHandler:ErrorRequestHandler = (
   err,
@@ -13,9 +14,9 @@ const globalErrorHandler:ErrorRequestHandler = (
   res,
   next,
 ) => {
-  let statusCode = err.statusCode || 500;
+  let statusCode =  500;
   
-  let message = err?.message || 'something went wrong bro from globalmiddleware';
+  let message = 'something went wrong bro from globalmiddleware';
   
   let errorSources:TErrorSourses = [{
     path:"",
@@ -37,12 +38,32 @@ const globalErrorHandler:ErrorRequestHandler = (
     const simplifiedError = handleCastError(err)
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
-    statusCode = simplifiedError.statusCode
+    statusCode = simplifiedError?.statusCode
   }else if(err?.code === 11000){
     const simplifiedError = handleDuplicateError(err)
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
-    statusCode = simplifiedError.statusCode
+    statusCode = simplifiedError?.statusCode
+  }else if(err instanceof AppError){
+   
+    message = err?.message;
+    errorSources = [
+      {
+        path:'',
+        message:err?.message
+      }
+    ]
+    statusCode = err?.statusCode
+  }else if(err instanceof Error){
+   
+    message = err?.message;
+    errorSources = [
+      {
+        path:'',
+        message:err?.message
+      }
+    ]
+    
   }
   res.status(statusCode).json({
     success: false,
