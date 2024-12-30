@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { TAcademicDepartment } from './academicDepartment.interface';
 import AppError from '../../errors/AppError';
 
@@ -10,7 +10,7 @@ const AcademicDepartmentSchema = new Schema<TAcademicDepartment>(
       unique: true,
     },
 	academicFaculty: {
-		type: Schema.Types.ObjectId,
+		type: mongoose.Schema.Types.ObjectId,
 		ref: 'AcademicFaculty', // Matches AcademicFaculty model
 		required: true,
 	  },
@@ -22,15 +22,15 @@ const AcademicDepartmentSchema = new Schema<TAcademicDepartment>(
 
 
 // যদি আগেই একটা department same নামে থাকে তাহলে এইটা আটকায় দিবে
-AcademicDepartmentSchema.pre('save', async function (next) {
-	const isDepartmentExits = await AcademicDepartment.findOne({
-		name:this.name
-	});
-	if(isDepartmentExits){
-		throw new AppError(404,'This Department is already exists')
-	}
-	next()
-});
+// AcademicDepartmentSchema.pre('save', async function (next) {
+// 	const isDepartmentExits = await AcademicDepartment.findOne({
+// 		name:this.name
+// 	});
+// 	if(isDepartmentExits){
+// 		throw new AppError(404,'This Department is already exists')
+// 	}
+// 	next()
+// });
 
 // যদি ডিলিট করা কোন  department update করতে চায় তাহলে এই বেটা আটকায় দিবে
 AcademicDepartmentSchema.pre('findOneAndUpdate', async function (next) {

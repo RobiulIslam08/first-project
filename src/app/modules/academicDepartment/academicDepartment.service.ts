@@ -7,6 +7,8 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
 
  
   const result = await AcademicDepartment.create(payload);
+  console.log(payload)
+
   return result;
 };
 const getAllAcademicDepartmentFromDB = async () => {

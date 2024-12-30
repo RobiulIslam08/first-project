@@ -5,8 +5,8 @@ import status from 'http-status';
 import { AcademicDepartmentServices } from './academicDepartment.service';
 
 const createAcademicDeparment = catchAsync(async (req, res) => {
-  const result =
-    await AcademicDepartmentServices.createAcademicDepartmentIntoDB(req.body);
+  
+  const result =await AcademicDepartmentServices.createAcademicDepartmentIntoDB(req.body);
 
   sendResponse(res, {
     statusCode: status.OK,
