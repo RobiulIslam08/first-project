@@ -28,7 +28,7 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
   })
 
   //for filtering
-  const excludeFields = ['searchTerm','sort', 'limit','page', 'limit']
+  const excludeFields = ['searchTerm','sort', 'limit','page', 'limit','fields']
   excludeFields.forEach(el => delete queryObj[el])
   const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
     .populate('admissionDepartment') // Populate admissionDepartment
@@ -62,8 +62,18 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
       skip = (page - 1) * limit
     }
     const paginateQuery = sortQurey.skip(skip)
-    const limitQuery = await paginateQuery.limit(limit)
-  return limitQuery;
+    const limitQuery =  paginateQuery.limit(limit)
+
+
+    //field limiting
+    //f{ fields: 'name,email' } => এইটা query থেকে আসবে এইটাকে convert করতে হবে এইভাবে fields: 'name email'
+    let fields = '-__v'
+    if(query.fields){
+      fields = (query.fields as string).split(',').join(' ')  //fields: 'name email'
+      console.log({fields})
+    }
+    const fieldQuery =await limitQuery.select(fields)
+  return fieldQuery;
 };
 
 const getSingleStudentFromDB = async (studentId: string) => {
