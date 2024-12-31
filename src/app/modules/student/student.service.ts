@@ -6,6 +6,8 @@ import AppError from '../../errors/AppError';
 import status from 'http-status';
 import { User } from '../user/user.model';
 const getAllStudentFromDB = async (query:Record<string,unknown>) => {
+  console.log('base query', query)
+  const queryObj = {...query}
   //{email:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
   //{presentAdress:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
   //{'name.firstName':{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
@@ -15,15 +17,20 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
   if(query?.searchTerm){
     searchTerm= query?.searchTerm as string
   }
-
-
-  const result = await Student.find({
-    $or:['email','name.firstName','presentAddress'].map(field => (
+  const studentSearchableFields = ['email','name.firstName','presentAddress']
+  //for search
+  const searchQuery =  Student.find({  
+    $or:studentSearchableFields.map(field => (
       {
         [field]:{$regex:searchTerm, $options:'i'}
       }
     ))
   })
+
+  //for filtering
+  const excludeFields = ['searchTerm','sort']
+  excludeFields.forEach(el => delete queryObj[el])
+  const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
     .populate('admissionDepartment') // Populate admissionDepartment
     .populate({
       path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
@@ -32,7 +39,14 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
         model: 'AcademicFaculty', // Explicitly specify the model
       },
     });
-  return result;
+
+    //for sorting
+    let sort = '-createdAt'
+    if(query.sort){
+      sort = query.sort as string
+    }
+    const sortQurey =await filterQuery.sort(sort)
+  return sortQurey;
 };
 
 const getSingleStudentFromDB = async (studentId: string) => {
