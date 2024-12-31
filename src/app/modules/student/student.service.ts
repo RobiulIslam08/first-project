@@ -5,8 +5,25 @@ import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
 import status from 'http-status';
 import { User } from '../user/user.model';
-const getAllStudentFromDB = async () => {
-  const result = await Student.find()
+const getAllStudentFromDB = async (query:Record<string,unknown>) => {
+  //{email:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+  //{presentAdress:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+  //{'name.firstName':{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+
+  //dynamic ভাবে একসাথে এই তিনটা field এর vlaue এর উপর search query চালানোর জন্য map করতে হবে
+  let searchTerm = ''
+  if(query?.searchTerm){
+    searchTerm= query?.searchTerm as string
+  }
+
+
+  const result = await Student.find({
+    $or:['email','name.firstName','presentAddress'].map(field => (
+      {
+        [field]:{$regex:searchTerm, $options:'i'}
+      }
+    ))
+  })
     .populate('admissionDepartment') // Populate admissionDepartment
     .populate({
       path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty

@@ -7,8 +7,8 @@ import catchAsync from '../../utils/catchAsync';
 
 
 const getAllStudent = catchAsync(async (req: Request, res: Response) => {
- 
-    const result = await StudentServices.getAllStudentFromDB();
+
+    const result = await StudentServices.getAllStudentFromDB(req.query);
     res.status(200).json({
       success: true,
       messsage: 'Student retrieve successfully',

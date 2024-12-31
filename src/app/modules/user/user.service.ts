@@ -43,9 +43,9 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   
 	  await session.commitTransaction(); // সফল হলে ট্রানজেকশন সম্পন্ন করুন
 	  return newStudent[0]; // প্রথম ডকুমেন্ট রিটার্ন করুন
-	} catch (error) {
+	} catch (error:any) {
 	  await session.abortTransaction(); // কোনো এরর হলে রোলব্যাক করুন
-	  throw new Error('failed to create student'); // এরর থ্রো করুন
+	  throw new Error(error); // এরর থ্রো করুন
 	} finally {
 	  await session.endSession(); // সেশন বন্ধ করুন
 	}
