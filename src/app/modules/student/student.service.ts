@@ -28,7 +28,7 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
   })
 
   //for filtering
-  const excludeFields = ['searchTerm','sort']
+  const excludeFields = ['searchTerm','sort', 'limit']
   excludeFields.forEach(el => delete queryObj[el])
   const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
     .populate('admissionDepartment') // Populate admissionDepartment
@@ -45,8 +45,16 @@ const getAllStudentFromDB = async (query:Record<string,unknown>) => {
     if(query.sort){
       sort = query.sort as string
     }
-    const sortQurey =await filterQuery.sort(sort)
-  return sortQurey;
+    const sortQurey = filterQuery.sort(sort)
+
+
+    //limit query
+    let limit = 1;
+    if(query.limit){
+      limit = query.limit as number
+    }
+    const limitQuery = await filterQuery.limit(limit)
+  return limitQuery;
 };
 
 const getSingleStudentFromDB = async (studentId: string) => {
