@@ -5,76 +5,85 @@ import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
 import status from 'http-status';
 import { User } from '../user/user.model';
-const getAllStudentFromDB = async (query:Record<string,unknown>) => {
-  console.log('base query', query)
-  const queryObj = {...query} //copy
-  //{email:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
-  //{presentAdress:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
-  //{'name.firstName':{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+import QueryBuilder from '../../builder/QueryBuilder';
+import { studentSearchableFields } from './student.constant';
+const getAllStudentFromDB = async (query: Record<string, unknown>) => {
+  // console.log('base query', query)
+  // const queryObj = {...query} //copy
+  // //{email:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+  // //{presentAdress:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
+  // //{'name.firstName':{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
 
-  //dynamic ভাবে একসাথে এই তিনটা field এর vlaue এর উপর search query চালানোর জন্য map করতে হবে
-  let searchTerm = ''
-  if(query?.searchTerm){
-    searchTerm= query?.searchTerm as string
-  }
-  const studentSearchableFields = ['email','name.firstName','presentAddress']
-  //for search
-  const searchQuery =  Student.find({  
-    $or:studentSearchableFields.map(field => (
-      {
-        [field]:{$regex:searchTerm, $options:'i'}
-      }
-    ))
-  })
+  // //dynamic ভাবে একসাথে এই তিনটা field এর vlaue এর উপর search query চালানোর জন্য map করতে হবে
+  // let searchTerm = ''
+  // if(query?.searchTerm){
+  //   searchTerm= query?.searchTerm as string
+  // }
+  // const studentSearchableFields = ['email','name.firstName','presentAddress']
+  // //for search
+  // const searchQuery =  Student.find({
+  //   $or:studentSearchableFields.map(field => (
+  //     {
+  //       [field]:{$regex:searchTerm, $options:'i'}
+  //     }
+  //   ))
+  // })
 
-  //for filtering
-  const excludeFields = ['searchTerm','sort', 'limit','page', 'limit','fields']
-  excludeFields.forEach(el => delete queryObj[el])
-  const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
-    .populate('admissionDepartment') // Populate admissionDepartment
-    .populate({
-      path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
-      populate: {
-        path: 'academicFaculty',
-        model: 'AcademicFaculty', // Explicitly specify the model
-      },
-    });
+  // //for filtering
+  // const excludeFields = ['searchTerm','sort', 'limit','page', 'limit','fields']
+  // excludeFields.forEach(el => delete queryObj[el])
+  // const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
+  //   .populate('admissionDepartment') // Populate admissionDepartment
+  //   .populate({
+  //     path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+  //     populate: {
+  //       path: 'academicFaculty',
+  //       model: 'AcademicFaculty', // Explicitly specify the model
+  //     },
+  //   });
 
-    //for sorting
-    let sort = '-createdAt'
-    if(query.sort){
-      sort = query.sort as string
-    }
+  //   //for sorting
+  //   let sort = '-createdAt'
+  //   if(query.sort){
+  //     sort = query.sort as string
+  //   }
 
-    const sortQurey = filterQuery.sort(sort)
+  //   const sortQurey = filterQuery.sort(sort)
 
+  //   //limit query
+  //   let limit = 1;
+  //   if(query.limit){
+  //     limit = query.limit as number
+  //   }
+  //   //paginate
+  //   let page = 1;
+  //   let skip = 1;
+  //   if(query.page){
+  //     page = query.page as number;
+  //     skip = (page - 1) * limit
+  //   }
+  //   const paginateQuery = sortQurey.skip(skip)
+  //   const limitQuery =  paginateQuery.limit(limit)
 
-    //limit query
-    let limit = 1;
-    if(query.limit){
-      limit = query.limit as number
-    }
-
-    let page = 1;
-    let skip = 1;
-    if(query.page){
-      page = query.page as number;
-      skip = (page - 1) * limit
-    }
-    const paginateQuery = sortQurey.skip(skip)
-    const limitQuery =  paginateQuery.limit(limit)
-
-
-    //field limiting
-    //f{ fields: 'name,email' } => এইটা query থেকে আসবে এইটাকে convert করতে হবে এইভাবে fields: 'name email'
-    let fields = '-__v'
-    if(query.fields){
-      fields = (query.fields as string).split(',').join(' ')  //fields: 'name email'
-      console.log({fields})
-    }
-    const fieldQuery =await limitQuery.select(fields)
-  return fieldQuery;
+  //   //field limiting
+  //   //f{ fields: 'name,email' } => এইটা query থেকে আসবে এইটাকে convert করতে হবে এইভাবে fields: 'name email'
+  //   let fields = '-__v'
+  //   if(query.fields){
+  //     fields = (query.fields as string).split(',').join(' ')  //fields: 'name email'
+  //     console.log({fields})
+  //   }
+  //   const fieldQuery =await limitQuery.select(fields)
+  // return fieldQuery;
+  const studentQuery = new QueryBuilder(Student.find(), query)
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const result = await studentQuery.modelQuery;
+  return result
 };
+
 
 const getSingleStudentFromDB = async (studentId: string) => {
   const result = await Student.findOne({ id: studentId })
@@ -123,7 +132,7 @@ const deleteStudentFromDB = async (studentId: string) => {
   } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error('Failed to delete student')
+    throw new Error('Failed to delete student');
   }
 };
 const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
