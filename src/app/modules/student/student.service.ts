@@ -7,7 +7,7 @@ import status from 'http-status';
 import { User } from '../user/user.model';
 const getAllStudentFromDB = async (query:Record<string,unknown>) => {
   console.log('base query', query)
-  const queryObj = {...query}
+  const queryObj = {...query} //copy
   //{email:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
   //{presentAdress:{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
   //{'name.firstName':{$regex:query.searchTerm, $options:'i'}} // search for spesifiq field
