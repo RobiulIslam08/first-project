@@ -9,7 +9,8 @@ class QueryBuilder <T>{
 		this.query = query
 	}
 	search(searchableFields:string[]){ //searchableFields= যে field গুলোর উপর search করা হবে
-		if(this.query.searchTerm){
+		const searchTerm = this.query.searchTerm
+		if(searchTerm){
 			  this.modelQuery =  this.modelQuery.find({  
 				$or:searchableFields.map((field: any) => (
 				  {
@@ -26,5 +27,10 @@ class QueryBuilder <T>{
 		excludeFields.forEach(el => delete queryObj[el])
 		this.modelQuery =  this.modelQuery.find(queryObj as FilterQuery<T>) 
 		return this
+	}
+	sort(){
+		const sort =  this.query.sort || '-createdAt' ;
+		this.modelQuery = this.modelQuery.sort(sort as string);
+		return this;
 	}
 }
