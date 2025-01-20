@@ -29,7 +29,8 @@ class QueryBuilder <T>{
 		return this
 	}
 	sort(){
-		const sort =  this.query.sort || '-createdAt' ;
+		//sort ্একাধিক feild recive করবে যেটা ’ , ‘ like sort=name,-emial এইভাবে আসতে পারে তাই সেটাকে split করে নিয়েছি
+		const sort =(this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt' ;
 		this.modelQuery = this.modelQuery.sort(sort as string);
 		return this;
 	}
@@ -41,6 +42,7 @@ class QueryBuilder <T>{
 		return this
 	}
 	fields(){
+			//fields ্একাধিক feild recive করবে যেটা ’ , ‘ like fields=name,emial এইভাবে আসতে পারে তাই সেটাকে split করে নিয়েছি
 		const fields = (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
 		this.modelQuery = this.modelQuery.select(fields);
 		return this;

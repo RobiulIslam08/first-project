@@ -33,14 +33,14 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
   // const excludeFields = ['searchTerm','sort', 'limit','page', 'limit','fields']
   // excludeFields.forEach(el => delete queryObj[el])
   // const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
-  //   .populate('admissionDepartment') // Populate admissionDepartment
-  //   .populate({
-  //     path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
-  //     populate: {
-  //       path: 'academicFaculty',
-  //       model: 'AcademicFaculty', // Explicitly specify the model
-  //     },
-  //   });
+    // .populate('admissionDepartment') // Populate admissionDepartment
+    // .populate({
+    //   path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+    //   populate: {
+    //     path: 'academicFaculty',
+    //     model: 'AcademicFaculty', // Explicitly specify the model
+    //   },
+    // });
 
   //   //for sorting
   //   let sort = '-createdAt'
@@ -74,7 +74,14 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
   //   }
   //   const fieldQuery =await limitQuery.select(fields)
   // return fieldQuery;
-  const studentQuery = new QueryBuilder(Student.find(), query)
+  const studentQuery = new QueryBuilder(Student.find().populate('admissionDepartment') // Populate admissionDepartment
+  .populate({
+    path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+    populate: {
+      path: 'academicFaculty',
+      model: 'AcademicFaculty', // Explicitly specify the model
+    },
+  }), query)
     .search(studentSearchableFields)
     .filter()
     .sort()
