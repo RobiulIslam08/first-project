@@ -92,8 +92,8 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
 };
 
 
-const getSingleStudentFromDB = async (studentId: string) => {
-  const result = await Student.findOne({ id: studentId })
+const getSingleStudentFromDB = async (id: string) => {
+  const result = await Student.findById( id)
     .populate('admissionDepartment') // Populate admissionDepartment
     .populate({
       path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
@@ -104,7 +104,7 @@ const getSingleStudentFromDB = async (studentId: string) => {
     });
   return result;
 };
-const deleteStudentFromDB = async (studentId: string) => {
+const deleteStudentFromDB = async (id: string) => {
   //transaction session start
   const session = await mongoose.startSession();
   try {
@@ -112,8 +112,8 @@ const deleteStudentFromDB = async (studentId: string) => {
     session.startTransaction();
 
     //transaction -1
-    const deletedStudent = await Student.findOneAndUpdate(
-      { id: studentId },
+    const deletedStudent = await Student.findByIdAndUpdate(
+       id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -123,8 +123,10 @@ const deleteStudentFromDB = async (studentId: string) => {
     }
 
     //transaction -2
-    const deletedUser = await User.findOneAndUpdate(
-      { id: studentId },
+    //get user id form deletedStudent
+    const userId = deletedStudent.user;
+    const deletedUser = await User.findByIdAndUpdate(
+       userId,
       { isDeleted: true },
       { new: true, session },
     );
@@ -167,7 +169,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
     }
   }
 
-  const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
+  const result = await Student.findByIdAndUpdate( id , modifiedUpdatedData, {
     new: true,
     runValidators: true,
   });

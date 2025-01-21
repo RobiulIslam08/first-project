@@ -1,5 +1,6 @@
-import { TGender } from "./admin.interface";
 import { TBloodGroup } from "./admin.interface";
+import { TGender } from "./admin.interface";
+
 
 
 
