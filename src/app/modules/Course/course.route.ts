@@ -7,7 +7,7 @@ import { CourseController } from './course.controller';
 
 const router = express.Router();
 router.post(
-  '/create-academic-faculty',
+  '/create-course',
   validateRequest(
     CourseValidation.createCourseValidationSchema,
   ),
