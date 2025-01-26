@@ -5,7 +5,7 @@ import catchAsync from "../../utils/catchAsync";
 import { CourseServices } from "./course.service";
 import sendResponse from "../../utils/sendResponse";
 
-const createAcademicFaculty  = catchAsync(async (req, res) => {
+const createCourse  = catchAsync(async (req, res) => {
 
    const result = await CourseServices.createCourseIntoDB(req.body)
 
@@ -52,7 +52,7 @@ const deleteCourse = catchAsync(async(req, res)=>{
 })
 
 export const CourseController = {
-  createAcademicFaculty,
+  createCourse,
   getAllCourse,
   getSingleCourse,
   deleteCourse
