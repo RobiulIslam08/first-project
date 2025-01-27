@@ -46,7 +46,7 @@ const deleteCourse = catchAsync(async(req, res)=>{
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: ' Academic faculty is updated successfully',
+    message: ' course deleted successfully',
     data: result,
   });
 })

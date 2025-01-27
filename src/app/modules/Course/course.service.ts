@@ -24,6 +24,7 @@ const getSingleCourseFromDB  = async (id:string) =>{
 }
 const deleteCourseFromDB = async (id:string) =>{
 	const result = Course.findByIdAndUpdate(id,{isDeleted:true},{new:true})
+	return result
 }
 export const CourseServices = {
 	createCourseIntoDB,
