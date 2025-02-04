@@ -41,7 +41,7 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
   try {
     session.startTransaction();
     //basic course info update
-    const updateBasicCourseInfo =await Course.findByIdAndUpdate(
+    const updateBasicCourseInfo = await Course.findByIdAndUpdate(
       id,
       courseRemainingData,
       { new: true, runValidators: true, session },
@@ -85,32 +85,40 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
         throw new AppError(status.BAD_REQUEST, 'Failed to update course');
       }
     }
-   
 
     // data response এ দেখানোর জন্য find করা হয়েছে
     const result = await Course.findById(id).populate(
       'preRequisteCourses.course',
     );
-      
-  await session.commitTransaction(); // সব ঠিক থাকলে কমিট হবে
-  session.endSession();
+
+    await session.commitTransaction(); // সব ঠিক থাকলে কমিট হবে
+    session.endSession();
     return result;
-    
   } catch (error) {
     await session.abortTransaction(); // কোনো সমস্যা হলে পূর্বের অবস্থায় ফিরে যাবে
     session.endSession();
-    throw new AppError(status.BAD_REQUEST,'Failed to update course')
-   }
+    throw new AppError(status.BAD_REQUEST, 'Failed to update course');
+  }
 };
-const assignFacultiesIntoDB = async (id:string, payload:TCourseFaculty) =>{
- const result = await CourseFaculty.findByIdAndUpdate(id,{$addToSet:{faculties:{$each:payload}}},{upsert:true,new:true})
- return result
-}
+const assignFacultiesIntoDB = async (id: string, payload: TCourseFaculty) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+      course: id,
+      $addToSet: { faculties: { $each: payload } },
+    },
+    {
+      upsert: true,
+      new: true,
+    },
+  );
+  return result;
+};
 export const CourseServices = {
   createCourseIntoDB,
   getAllCourseFromDB,
   getSingleCourseFromDB,
   updateCourseIntoDB,
   deleteCourseFromDB,
-  assignFacultiesIntoDB
+  assignFacultiesIntoDB,
 };
