@@ -100,7 +100,7 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
     throw new AppError(status.BAD_REQUEST, 'Failed to update course');
   }
 };
-const assignFacultiesIntoDB = async (id: string, payload: TCourseFaculty) => {
+const assignFacultiesWithCourseIntoDB = async (id: string, payload: TCourseFaculty) => {
   const result = await CourseFaculty.findByIdAndUpdate(
     id,
     {
@@ -114,11 +114,26 @@ const assignFacultiesIntoDB = async (id: string, payload: TCourseFaculty) => {
   );
   return result;
 };
+const removedFacultiesWithCourseFromDB = async (id: string, payload: TCourseFaculty) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+     
+      $pull: { faculties: { $in: payload } },
+    },
+    {
+     
+      new: true,
+    },
+  );
+  return result;
+};
 export const CourseServices = {
   createCourseIntoDB,
   getAllCourseFromDB,
   getSingleCourseFromDB,
   updateCourseIntoDB,
   deleteCourseFromDB,
-  assignFacultiesIntoDB,
+  assignFacultiesWithCourseIntoDB,
+  removedFacultiesWithCourseFromDB
 };
