@@ -11,7 +11,7 @@ const updateSemesterRegistrationIntoDB = ()=> {
 
 }
 const deleteSemesterRegistrationFromDB = ()=> {
-	
+	console.log("")
 }
 export const  SemesterRegistrationServices  = {
 	createSemesterRegistrationIntoDB,
