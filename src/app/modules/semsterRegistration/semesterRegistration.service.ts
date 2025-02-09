@@ -31,8 +31,9 @@ const getAllSemesterRegistrationsFromDB = async() => {
 	const result = await SemesterRegistration.find()
 	return result
 }
-const getSingleSemesterRegistrationsFromDB = ()=>{
-
+const getSingleSemesterRegistrationsFromDB = async (id:string)=>{
+	const result = await SemesterRegistration.findById(id)
+	return result
 }
 const updateSemesterRegistrationIntoDB = async()=> {
 
