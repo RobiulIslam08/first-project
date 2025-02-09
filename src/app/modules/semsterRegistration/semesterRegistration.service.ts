@@ -28,7 +28,8 @@ const  createSemesterRegistrationIntoDB =async (payload:TSemesterRagistration) =
 
 }
 const getAllSemesterRegistrationsFromDB = async() => {
-
+	const result = await SemesterRegistration.find()
+	return result
 }
 const getSingleSemesterRegistrationsFromDB = ()=>{
 
