@@ -7,6 +7,6 @@ const router = express.Router()
 router.get('/',SemesterRegistrationController.getAllSemesterRegistrations)
 router.get('/:id',SemesterRegistrationController.getSingleSemesterRegistration)
 router.post('/create-semester-registration',validateRequest(SemesterRegistrationValidations.createSemesterRegistrationValidationSchema),SemesterRegistrationController.createSemesterRegistration)
-router.patch('/', validateRequest(SemesterRegistrationValidations.updateSemesterRegistrationValidationSchema),SemesterRegistrationController.updateSemesterRegistration)
+router.patch('/:id', validateRequest(SemesterRegistrationValidations.updateSemesterRegistrationValidationSchema),SemesterRegistrationController.updateSemesterRegistration)
 router.delete('/:id', SemesterRegistrationController.deleteSemesterRegistration)
 export const semesterRegistrationRoutes  = router
