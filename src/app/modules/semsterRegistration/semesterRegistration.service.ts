@@ -10,19 +10,16 @@ const createSemesterRegistrationIntoDB = async (
   const academicSemester = payload?.academicSemester;
 
   // check if there any registered semester that is alread 'UPCOMING' / 'ONGOING'.
-  const isThereAnyUpcomingOrONgoingSemester = await SemesterRegistration.findOne({
-    $or:[{status:'UPCOMING'}, {status:'ONGOING'}]
-  })
-  if(isThereAnyUpcomingOrONgoingSemester){
-    throw new AppError(httpStatus.BAD_REQUEST, `There is already a ${isThereAnyUpcomingOrONgoingSemester.status}`)
+  const isThereAnyUpcomingOrONgoingSemester =
+    await SemesterRegistration.findOne({
+      $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
+    });
+  if (isThereAnyUpcomingOrONgoingSemester) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `There is already a ${isThereAnyUpcomingOrONgoingSemester.status} registered semsester!`,
+    );
   }
-
-
-
-
-
-
-
 
   // check if the semester is exits
   const isAcademicSemesterExits =
@@ -50,8 +47,12 @@ const getAllSemesterRegistrationsFromDB = async (
   const semesterRegistrationQuery = new QueryBuilder(
     SemesterRegistration.find().populate('academicSemester'),
     query,
-  ).filter().paginate().sort().fields();
-  const result = await semesterRegistrationQuery.modelQuery
+  )
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+  const result = await semesterRegistrationQuery.modelQuery;
 
   return result;
 };
@@ -59,8 +60,19 @@ const getSingleSemesterRegistrationsFromDB = async (id: string) => {
   const result = await SemesterRegistration.findById(id);
   return result;
 };
-const updateSemesterRegistrationIntoDB = async (id:string) => {
-	
+const updateSemesterRegistrationIntoDB = async (id: string, payload:Partial<TSemesterRagistration>) => {
+  const requestSemester = await SemesterRegistration.findById(id);
+  // check if the semester is already registered
+  const isSemesterRegistrationExits = await SemesterRegistration.findById(id)
+  if(!isSemesterRegistrationExits){
+    throw new AppError(status.NOT_FOUND, 'This semester is not found')
+  }
+
+  // if requested semester registration is ended, we will not update
+  
+  if(requestSemester?.status === 'ENDED'){
+    throw new AppError(status.BAD_REQUEST, `This semester is already ${requestSemester.status}`)
+  }
 };
 const deleteSemesterRegistrationFromDB = async () => {
   console.log('');
