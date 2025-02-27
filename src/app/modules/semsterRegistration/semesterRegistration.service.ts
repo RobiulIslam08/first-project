@@ -8,6 +8,7 @@ const createSemesterRegistrationIntoDB = async (
   payload: TSemesterRagistration,
 ) => {
   const academicSemester = payload?.academicSemester;
+  
 
   // check if there any registered semester that is alread 'UPCOMING' / 'ONGOING'.
   const isThereAnyUpcomingOrONgoingSemester =
