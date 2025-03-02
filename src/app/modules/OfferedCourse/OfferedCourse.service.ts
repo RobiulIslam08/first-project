@@ -93,8 +93,27 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
 
 if (isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection) {
   throw new AppError(
-    httpStatus.BAD_REQUEST,
+    status.BAD_REQUEST,
     `Offered course with same section is already exist!`,
+  );
+}
+ // get the schedules of the faculties
+ const assignedSchedules = await OfferedCourse.find({
+  semesterRegistration,
+  faculty,
+  days: { $in: days },
+}).select('days startTime endTime');
+
+const newSchedule = {
+  days,
+  startTime,
+  endTime,
+};
+
+if (hasTimeConflict(assignedSchedules, newSchedule)) {
+  throw new AppError(
+    status.CONFLICT,
+    `This faculty is not available at that time ! Choose other time or day`,
   );
 }
   const result = await OfferedCourse.create({ ...payload, academicSemester });
