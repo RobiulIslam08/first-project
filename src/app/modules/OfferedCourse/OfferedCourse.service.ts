@@ -226,7 +226,7 @@ const deleteOfferedCourseFromDB = async (id: string) => {
   if (semesterRegistrationStatus?.status !== 'UPCOMING') {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      `Offered course can not update ! because the semester ${semesterRegistrationStatus}`,
+      `Offered course can't update ! because the semester ${semesterRegistrationStatus}`,
     );
   }
 
