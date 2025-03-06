@@ -11,5 +11,6 @@ export interface TUser {
 export interface UserModel extends Model<TUser> {
   isUserExitsByCustomId(id:string):Promise<TUser>;
   isPasswordMatched(plaineTextPasswored:string, hasedPassword:string):Promise<boolean>;
-  isDeleted(id:string):Promise<boolean>
+  isDeleted(id:string):Promise<boolean>;
+  userStatus(id:string):Promise<string>
 }

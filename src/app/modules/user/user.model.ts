@@ -60,4 +60,8 @@ userSchema.statics.isDeleted = async function(id){
   const user = await User.findOne({ id })
   return user?user.isDeleted:false
 }
+userSchema.statics.userStatus = async function(id){
+  const user = await User.findOne({ id })
+  return user?.status || null
+}
 export const User = model<TUser,UserModel>('User', userSchema)

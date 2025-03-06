@@ -11,6 +11,7 @@ const loginUser = async (payload: TLoginUser) => {
   if (!user) {
     throw new AppError(status.NOT_FOUND, 'This user is not found');
   }
+
   //   //    checking if the user is deleted
   //   const isDeleted = isUserExits?.isDeleted;
   //   if (isDeleted) {
@@ -25,7 +26,11 @@ const loginUser = async (payload: TLoginUser) => {
   //   if (userStatus === 'blocked') {
   //     throw new AppError(status.NOT_FOUND, 'This user is already blocked');
   //   }
-
+  const userStatus = await User.userStatus(user.id); 
+  console.log(userStatus)
+    if(userStatus === 'blocked'){
+      throw new AppError(status.NOT_FOUND, 'This user is already blocked');
+    }
   // //   checking if the password is correct
   //   const hashPassword = isUserExits?.password;
   //   const isPasswordMatched =  await bcrypt.compare(payload.password, hashPassword); // true
