@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose';
 import { TUser, UserModel } from './user.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
+import { boolean } from 'joi';
 const userSchema = new Schema<TUser, UserModel>({
   id: {
     type: String,
@@ -54,5 +55,9 @@ userSchema.statics.isUserExitsByCustomId = async function(id){
 }
 userSchema.statics.isPasswordMatched = async function(plaineTextPasswored,hasedPassword){
   return await bcrypt.compare(plaineTextPasswored, hasedPassword)
+}
+userSchema.statics.isDeleted = async function(id){
+  const user = await User.findOne({ id })
+  return user?user.isDeleted:false
 }
 export const User = model<TUser,UserModel>('User', userSchema)
