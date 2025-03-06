@@ -49,4 +49,10 @@ userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
+userSchema.statics.isUserExitsByCustomId = async function(id){
+  return await User.findOne({ id })
+}
+userSchema.statics.isPasswordMatched = async function(plaineTextPasswored,hasedPassword){
+  return await bcrypt.compare(plaineTextPasswored, hasedPassword)
+}
 export const User = model<TUser,UserModel>('User', userSchema)
