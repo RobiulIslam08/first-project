@@ -29,7 +29,7 @@ const loginUser = async (payload: TLoginUser) => {
   const userStatus = await User.userStatus(user.id); 
   console.log(userStatus)
     if(userStatus === 'blocked'){
-      throw new AppError(status.NOT_FOUND, 'This user is already blocked');
+      throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
     }
   // //   checking if the password is correct
   //   const hashPassword = isUserExits?.password;
