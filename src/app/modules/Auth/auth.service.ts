@@ -1,8 +1,9 @@
+import config from '../../config';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import status from 'http-status';
-import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 const loginUser = async (payload: TLoginUser) => {
   // securePassword123
 
@@ -13,24 +14,24 @@ const loginUser = async (payload: TLoginUser) => {
   }
 
   //   //    checking if the user is deleted
-  //   const isDeleted = isUserExits?.isDeleted;
-  //   if (isDeleted) {
-  //     throw new AppError(status.NOT_FOUND, 'This user is already deleted');
-  //   }
-  if(await User.isDeleted(user.id)){
+  const isDeleted = user?.isDeleted;
+  if (isDeleted) {
+    throw new AppError(status.NOT_FOUND, 'This user is already deleted');
+  }
+  if (await User.isDeleted(user.id)) {
     throw new AppError(status.NOT_FOUND, 'This user is already deleted');
   }
 
   //   //    checking if the user statas bolcked
-  //   const userStatus = isUserExits?.status;
-  //   if (userStatus === 'blocked') {
-  //     throw new AppError(status.NOT_FOUND, 'This user is already blocked');
-  //   }
-  const userStatus = await User.userStatus(user.id); 
-  console.log(userStatus)
-    if(userStatus === 'blocked'){
-      throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
-    }
+  // const userStatus = isUserExits?.status;
+  // if (userStatus === 'blocked') {
+  //   throw new AppError(status.NOT_FOUND, 'This user is already blocked');
+  // }
+  const userStatus =  user?.status;
+  console.log(userStatus);
+  if (userStatus === 'blocked') {
+    throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
+  }
   // //   checking if the password is correct
   //   const hashPassword = isUserExits?.password;
   //   const isPasswordMatched =  await bcrypt.compare(payload.password, hashPassword); // true
@@ -40,8 +41,17 @@ const loginUser = async (payload: TLoginUser) => {
   if (!(await User.isPasswordMatched(payload?.password, user?.password))) {
     throw new AppError(status.FORBIDDEN, 'This user password not matched');
   }
-
-  return {};
+   
+  // create token and send to the cliend
+  const jwtPayload = {
+    userId:user,
+    role:user?.role
+  }
+  const accessToken =  jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: '10d' });
+  
+  return {
+    accessToken
+  };
 };
 export const AuthServices = {
   loginUser,
