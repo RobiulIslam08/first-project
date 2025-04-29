@@ -28,7 +28,7 @@ const loginUser = async (payload: TLoginUser) => {
   //   throw new AppError(status.NOT_FOUND, 'This user is already blocked');
   // }
   const userStatus =  user?.status;
-  console.log(userStatus);
+
   if (userStatus === 'blocked') {
     throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
   }
@@ -50,7 +50,8 @@ const loginUser = async (payload: TLoginUser) => {
   const accessToken =  jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: '10d' });
   
   return {
-    accessToken
+    accessToken,
+    needPasswordChange:user?.needPasswordChange
   };
 };
 export const AuthServices = {
