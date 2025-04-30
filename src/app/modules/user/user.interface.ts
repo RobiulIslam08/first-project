@@ -10,9 +10,12 @@ export interface TUser {
   isDeleted: boolean;
 }
 export interface UserModel extends Model<TUser> {
-  isUserExitsByCustomId(id:string):Promise<TUser>;
-  isPasswordMatched(plaineTextPasswored:string, hasedPassword:string):Promise<boolean>;
-  isDeleted(id:string):Promise<boolean>;
-  userStatus(id:string):Promise<string>
+  isUserExitsByCustomId(id: string): Promise<TUser>;
+  isPasswordMatched(
+    plaineTextPasswored: string,
+    hasedPassword: string,
+  ): Promise<boolean>;
+  isDeleted(id: string): Promise<boolean>;
+  userStatus(id: string): Promise<string>;
 }
-export type TUserRole = keyof typeof USER_ROLE
+export type TUserRole = keyof typeof USER_ROLE;

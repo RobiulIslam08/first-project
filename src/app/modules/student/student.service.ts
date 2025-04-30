@@ -33,14 +33,14 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
   // const excludeFields = ['searchTerm','sort', 'limit','page', 'limit','fields']
   // excludeFields.forEach(el => delete queryObj[el])
   // const filterQuery =  searchQuery.find(queryObj) //chaning for filtering
-    // .populate('admissionDepartment') // Populate admissionDepartment
-    // .populate({
-    //   path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
-    //   populate: {
-    //     path: 'academicFaculty',
-    //     model: 'AcademicFaculty', // Explicitly specify the model
-    //   },
-    // });
+  // .populate('admissionDepartment') // Populate admissionDepartment
+  // .populate({
+  //   path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+  //   populate: {
+  //     path: 'academicFaculty',
+  //     model: 'AcademicFaculty', // Explicitly specify the model
+  //   },
+  // });
 
   //   //for sorting
   //   let sort = '-createdAt'
@@ -74,26 +74,30 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
   //   }
   //   const fieldQuery =await limitQuery.select(fields)
   // return fieldQuery;
-  const studentQuery = new QueryBuilder(Student.find().populate('admissionDepartment') // Populate admissionDepartment
-  .populate({
-    path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
-    populate: {
-      path: 'academicFaculty',
-      model: 'AcademicFaculty', // Explicitly specify the model
-    },
-  }), query)
+  const studentQuery = new QueryBuilder(
+    Student.find()
+    .populate('user')
+      .populate('admissionDepartment') // Populate admissionDepartment
+      .populate({
+        path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+        populate: {
+          path: 'academicFaculty',
+          model: 'AcademicFaculty', // Explicitly specify the model
+        },
+      }),
+    query,
+  )
     .search(studentSearchableFields)
     .filter()
     .sort()
     .paginate()
     .fields();
   const result = await studentQuery.modelQuery;
-  return result
+  return result;
 };
 
-
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await Student.findById( id)
+  const result = await Student.findById(id)
     .populate('admissionDepartment') // Populate admissionDepartment
     .populate({
       path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
@@ -113,7 +117,7 @@ const deleteStudentFromDB = async (id: string) => {
 
     //transaction -1
     const deletedStudent = await Student.findByIdAndUpdate(
-       id,
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -126,7 +130,7 @@ const deleteStudentFromDB = async (id: string) => {
     //get user id form deletedStudent
     const userId = deletedStudent.user;
     const deletedUser = await User.findByIdAndUpdate(
-       userId,
+      userId,
       { isDeleted: true },
       { new: true, session },
     );
@@ -169,7 +173,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
     }
   }
 
-  const result = await Student.findByIdAndUpdate( id , modifiedUpdatedData, {
+  const result = await Student.findByIdAndUpdate(id, modifiedUpdatedData, {
     new: true,
     runValidators: true,
   });

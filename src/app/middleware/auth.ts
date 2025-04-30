@@ -18,8 +18,7 @@ const auth = (...requiredRules:TUserRole[]) => {
 			if(err){
 				throw new AppError(status.UNAUTHORIZED,'You are not authorized')
 			}
-			// decoded undefined
-			console.log(decoded)
+	
 			const role = (decoded as JwtPayload).role 
 			if(requiredRules && !requiredRules.includes(role)){
 				throw new AppError(status.UNAUTHORIZED,'You are not authorized')

@@ -3,12 +3,14 @@ import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import status from 'http-status';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 const loginUser = async (payload: TLoginUser) => {
   // securePassword123
 
+
   //   checking if the user is exits
   const user = await User.isUserExitsByCustomId(payload.id);
+  console.log(user)
   if (!user) {
     throw new AppError(status.NOT_FOUND, 'This user is not found');
   }
@@ -27,7 +29,7 @@ const loginUser = async (payload: TLoginUser) => {
   // if (userStatus === 'blocked') {
   //   throw new AppError(status.NOT_FOUND, 'This user is already blocked');
   // }
-  const userStatus =  user?.status;
+  const userStatus = user?.status;
 
   if (userStatus === 'blocked') {
     throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
@@ -41,19 +43,25 @@ const loginUser = async (payload: TLoginUser) => {
   if (!(await User.isPasswordMatched(payload?.password, user?.password))) {
     throw new AppError(status.FORBIDDEN, 'This user password not matched');
   }
-   
+
   // create token and send to the cliend
   const jwtPayload = {
-    userId:user?.id,
-    role:user?.role
-  }
-  const accessToken =  jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: '10d' });
-  
+    userId: user?.id,
+    role: user?.role,
+  };
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: '10d',
+  });
+
   return {
     accessToken,
-    needPasswordChange:user?.needPasswordChange
+    needPasswordChange: user?.needPasswordChange,
   };
 };
+const changePassword = (user, payload) =>{
+
+}
 export const AuthServices = {
   loginUser,
+  changePassword
 };

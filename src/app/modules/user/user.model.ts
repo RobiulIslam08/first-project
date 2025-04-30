@@ -12,6 +12,7 @@ const userSchema = new Schema<TUser, UserModel>({
   password: {
     type: String,
     required: true,
+    select:0, // এটা করার মাধ্যমে find করার সময় আর এটা show করবে নাহ
   },
   needPasswordChange: {
     type: Boolean,
@@ -51,7 +52,7 @@ userSchema.post('save', function (doc, next) {
   next();
 });
 userSchema.statics.isUserExitsByCustomId = async function(id){
-  return await User.findOne({ id })
+  return await User.findOne({ id }).select('+password')
 }
 userSchema.statics.isPasswordMatched = async function(plaineTextPasswored,hasedPassword){
   return await bcrypt.compare(plaineTextPasswored, hasedPassword)
@@ -65,3 +66,5 @@ userSchema.statics.userStatus = async function(id){
   return user?.status || null
 }
 export const User = model<TUser,UserModel>('User', userSchema)
+
+
