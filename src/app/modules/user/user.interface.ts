@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { USER_ROLE } from './user.constant';
 
 export interface TUser {
   id: string;
@@ -14,3 +15,4 @@ export interface UserModel extends Model<TUser> {
   isDeleted(id:string):Promise<boolean>;
   userStatus(id:string):Promise<string>
 }
+export type TUserRole = keyof typeof USER_ROLE

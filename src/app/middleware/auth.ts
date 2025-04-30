@@ -4,7 +4,8 @@ import AppError from "../errors/AppError"
 import status from 'http-status'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from "../config"
-const auth = () => {
+import { TUserRole } from "../modules/user/user.interface"
+const auth = (...requiredRules:TUserRole[]) => {
 	return catchAsync(async(req:Request, res:Response, next:NextFunction) => {
 		 const token = req.headers.authorization
 		//  যদি টোকেন না থাকে
@@ -19,6 +20,10 @@ const auth = () => {
 			}
 			// decoded undefined
 			console.log(decoded)
+			const role = (decoded as JwtPayload).role 
+			if(requiredRules && !requiredRules.includes(role)){
+				throw new AppError(status.UNAUTHORIZED,'You are not authorized')
+			}
 			req.user = decoded as JwtPayload
 			next()
 		  });
