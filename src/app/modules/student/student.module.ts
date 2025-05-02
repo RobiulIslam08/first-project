@@ -161,7 +161,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>(
     profileImg: {
       type: String,
     },
-    admissionDepartment: {
+    academicDepartment: {
       type: Schema.Types.ObjectId,
       ref: 'AcademicDepartment', // Matches AcademicDepartment model
       required: true,
