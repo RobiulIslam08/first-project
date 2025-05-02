@@ -5,6 +5,7 @@ import { TLoginUser } from './auth.interface';
 import status from 'http-status';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { createToken } from './auth.utils';
 const loginUser = async (payload: TLoginUser) => {
   // securePassword123
 
@@ -39,16 +40,16 @@ const loginUser = async (payload: TLoginUser) => {
     throw new AppError(status.FORBIDDEN, 'This user password not matched');
   }
 
-  // create token and send to the cliend
+  // create accestoken, refreshToken and send to the cliend
   const jwtPayload = {
     userId: user?.id,
     role: user?.role,
   };
-  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: '10d',
-  });
+  const accessToken = createToken(jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as string)
+  const refreshToken = createToken(jwtPayload,config.jwt_refresh_secret as string,config.jwt_refresh_expires_in as string)
 
   return {
+    refreshToken,
     accessToken,
     needPasswordChange: user?.needPasswordChange,
   };
