@@ -116,7 +116,59 @@ const changePassword = async (
   );
   return null;
 };
+const refreshToken = async (token:string) => {
+  
+
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload;
+  const {  userId, iat } = decoded;
+  //   checking if the user is exits
+  const user = await User.isUserExitsByCustomId(userId);
+  console.log(user);
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'This user is not found');
+  }
+
+  //   //    checking if the user is deleted
+  const isDeleted = user?.isDeleted;
+  if (isDeleted) {
+    throw new AppError(status.NOT_FOUND, 'This user is already deleted');
+  }
+  if (await User.isDeleted(user.id)) {
+    throw new AppError(status.NOT_FOUND, 'This user is already deleted');
+  }
+
+  const userStatus = user?.status;
+
+  if (userStatus === 'blocked') {
+    throw new AppError(status.NOT_FOUND, 'This user is already blocked !');
+  }
+  //token যদি চুরি হয়ে যায় আর এটা user বুঝার পরে password change করে ফেলবে। ফলে আবার database এই passwordChangedAt field  এর  সাথে jwtIssuedTimeStamp এর সাথে তুলনা করে hacked করা token আটকানো যাবে। passwordChangedTimestamp যদি jwtIssuedTimestamp এর চেয়ে বড় হয় তাহলে বুঝতে পারবো password change হয়েছে । যদি টোকেন আগে তৈরী হয় পরে password change হয় তাহলে আমরা token কে invalid করে দিবো
+  if (
+    user.passwordChangedAt &&
+    User.isJWTIssuedBeforePasswordChanged(
+      user.passwordChangedAt,
+      iat as number,
+    )
+  ) {
+    throw new AppError(
+      status.UNAUTHORIZED,
+      'You are not authorized token hacked ',
+    );
+  }
+  const jwtPayload = {
+    userId: user?.id,
+    role: user?.role,
+  };
+  const accessToken = createToken(jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as string)
+  return {
+    accessToken
+  }
+}
 export const AuthServices = {
   loginUser,
   changePassword,
+  refreshToken
 };
