@@ -2,7 +2,7 @@ import { FilterQuery, Query } from "mongoose";
 
 class QueryBuilder <T>{
 	public modelQuery:Query<T[],T> ; // এটা হলো মডেল এর নাম like User, Student
-	public query:Record<string,unknown>; // এইটা হলো query তে আসা ডাটাগুলেঅ
+	public query:Record<string,unknown>; // এইটা হলো query তে আসা ডাটাগুলো
 
 	constructor(modelQuery:Query<T[],T>,query:Record<string,unknown>){
 		this.modelQuery = modelQuery;
@@ -16,7 +16,7 @@ class QueryBuilder <T>{
 				  {
 					[field]:{$regex:searchTerm, $options:'i'},
 				  }
-				) as FilterQuery<T>),
+				) as FilterQuery<T>), // ‍এইটা যে একটা query সেটা বুঝানোর জন্যে FilterQuery<T> ব্যবহার করা হলো এখানে
 			  })
 		}
 		return  this
@@ -44,7 +44,7 @@ class QueryBuilder <T>{
 	fields(){
 			//fields ্একাধিক feild recive করবে যেটা ’ , ‘ like fields=name,emial এইভাবে আসতে পারে তাই সেটাকে split করে নিয়েছি
 		const fields = (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
-		this.modelQuery = this.modelQuery.select(fields);
+		this.modelQuery = this.modelQuery.select(fields); 
 		return this;
 
 	}

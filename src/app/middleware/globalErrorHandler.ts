@@ -1,12 +1,14 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { TErrorSourses } from '../interface/error';
-import config from '../config';
+
 import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
+import { CLIENT_RENEG_LIMIT } from 'tls';
+import config from '../config';
 
 const globalErrorHandler:ErrorRequestHandler = (
   err,
@@ -54,7 +56,7 @@ const globalErrorHandler:ErrorRequestHandler = (
       }
     ]
     statusCode = err?.statusCode
-  }else if(err instanceof Error){
+  }else if(err instanceof Error){  // aita sobar niche rakhte hobe . karon aita root err message
    
     message = err?.message;
     errorSources = [
@@ -63,6 +65,7 @@ const globalErrorHandler:ErrorRequestHandler = (
         message:err?.message
       }
     ]
+  
     
   }
   res.status(statusCode).json({

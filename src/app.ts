@@ -24,7 +24,7 @@ const test =  (req: Request, res: Response) => {
 }
 app.get('/', test );
 
-//global error handaling
+//global error handaling === aita sobsomoy niche rakha uchit. tanahole error catch korte parbe nah
 app.use(globalErrorHandler)
 app.use(notFound)
 

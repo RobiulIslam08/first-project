@@ -30,6 +30,6 @@ router.post(
   UserControllers.createAdmin,
 );
 
-export const UserRoutes = router;
+
 
 export const UserRoute = router;

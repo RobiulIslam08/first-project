@@ -52,6 +52,7 @@ userSchema.pre('save', async function (next) {
   );
   next();
 });
+// এইটা করার কারণ হলো যখন db তে ‍save হওয়ার পর response এ যেন password = ' ' হয়ে যায়। ফলি কেউ আর password টা দেখতে পারবেন নাহ। তাছাড়া user get করার সময় যাতে password filed টাই না দেখায় সেজন্য select:false করে দিতে হবে
 userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();

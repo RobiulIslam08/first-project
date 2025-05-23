@@ -9,9 +9,9 @@ import auth from '../../middleware/auth';
 const router = express.Router();
 
 router.post(
-  '/login',
+  '/login', 
   validateRequest(AuthValidation.loginValidationSchema),
-  AuthControllers.
+  AuthControllers.loginUser,
 );
 
 router.post(
