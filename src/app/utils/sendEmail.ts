@@ -9,12 +9,12 @@ export const sendEmail = async (to: string, html: string) => {
     auth: {
       // TODO: replace `user` and `pass` values from <https://forwardemail.net>
       user: 'robiulislamrobi0874@gmail.com',
-      pass: 'xfqj dshz wdui ymtb',
+      pass: 'lrgn fgxm wexn xoal',
     },
   });
 
   await transporter.sendMail({
-    from: 'rabiul.islam.webdev@gmail.com', // sender address
+    from: 'robiulislamrobi0874@gmail.com', // sender address
     to, // list of receivers
     subject: 'Reset your password within ten mins!', // Subject line
     text: '', // plain text body
