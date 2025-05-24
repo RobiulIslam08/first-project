@@ -54,7 +54,7 @@ const forgetPassword = catchAsync(async (req, res) => {
   const userId = req.body.id;
   const result = await AuthServices.forgetPassword(userId);
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: status.OK,
     success: true,
     message: 'Reset link is generated succesfully!',
     data: result,
