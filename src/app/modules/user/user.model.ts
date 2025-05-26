@@ -3,6 +3,7 @@ import { TUser, UserModel } from './user.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
 import { boolean } from 'joi';
+import { UserStatus } from './user.constant';
 const userSchema = new Schema<TUser, UserModel>(
   {
     id: {
@@ -33,7 +34,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     status: {
       type: String,
-      enum: ['in-progress', 'blocked'],
+      enum: UserStatus,
       default: 'in-progress',
     },
     isDeleted: {
