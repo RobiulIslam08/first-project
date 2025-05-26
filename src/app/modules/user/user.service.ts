@@ -16,8 +16,9 @@ import { TFaculty } from '../Faculty/faculty.interface';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { Faculty } from '../Faculty/faculty.model';
 import { Admin } from '../Admin/admin.model';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async ( file: any,password: string, payload: TStudent) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.default_pass as string);
   userData.role = 'student';
@@ -35,6 +36,13 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // ম্যানুয়ালি আইডি জেনারেট করা
     userData.id = await generateStudentId(admissionSemester!);
 
+    // Image তৈরী করার জন্য 
+    const imageName = `${userData.id}${payload?.name?.firstName}`; // image এর নাম
+    const path = file?.path;
+    //send image to cloudinary
+    const { secure_url } = await sendImageToCloudinary(imageName, path) as { secure_url: string };
+    
+
     // ইউজার তৈরি [ট্রানজেকশন - ১]
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -44,6 +52,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // স্টুডেন্টের জন্য রেফারেন্স সেট করা
     payload.id = newUser[0].id; // অ্যারে থেকে প্রথম আইটেম
     payload.user = newUser[0]._id;
+    payload.profileImg = secure_url;
 
     // স্টুডেন্ট তৈরি [ট্রানজেকশন - ২]
     const newStudent = await Student.create([payload], { session });

@@ -14,7 +14,7 @@ const createStudent  = catchAsync(async (req, res) => {
     const {password, student: studentData } = req.body;
     //data validation using zod
     // const zodParseData = studentValidationSchema.parse(studentData)
-    const result = await UserServices.createStudentIntoDB(password,studentData);
+    const result = await UserServices.createStudentIntoDB(req.file,password,studentData);
     //  if(error){
     // 	res.status(500).json({
     // 		success: false,
@@ -79,7 +79,7 @@ const changeStatus = catchAsync(async (req, res) => {
   const result = await UserServices.changeStatus(id, req.body);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: status.OK,
     success: true,
     message: 'Status is updated succesfully',
     data: result,
