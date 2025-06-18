@@ -76,10 +76,10 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
   // return fieldQuery;
   const studentQuery = new QueryBuilder(
     Student.find()
-    .populate('user')
-      .populate('admissionDepartment') // Populate admissionDepartment
+      .populate('user')
+      .populate('academicDepartment') // Populate admissionDepartment
       .populate({
-        path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+        path: 'academicDepartment', // Ensure admissionDepartment contains academicFaculty
         populate: {
           path: 'academicFaculty',
           model: 'AcademicFaculty', // Explicitly specify the model
@@ -92,8 +92,9 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
+    const meta =await studentQuery.countTotal();
   const result = await studentQuery.modelQuery;
-  return result;
+  return { meta, result };
 };
 
 const getSingleStudentFromDB = async (id: string) => {

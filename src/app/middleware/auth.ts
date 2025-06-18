@@ -7,6 +7,7 @@ import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import { User } from '../modules/user/user.model';
 const auth = (...requiredRules: TUserRole[]) => {
+  let decoded
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
     //  যদি টোকেন না থাকে
@@ -17,10 +18,15 @@ const auth = (...requiredRules: TUserRole[]) => {
       );
     }
 
-    const decoded = jwt.verify(
+   try{
+      decoded = jwt.verify(
       token,
       config.jwt_access_secret as string,
     ) as JwtPayload;
+   }catch{
+    throw new  AppError(status.UNAUTHORIZED, 'Unauthorized');
+   }
+
     const { role, userId, iat } = decoded;
     //   checking if the user is exits
     const user = await User.isUserExitsByCustomId(userId);
