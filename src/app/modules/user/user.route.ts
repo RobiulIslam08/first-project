@@ -12,10 +12,10 @@ const router = express.Router();
 
 router.post(
   '/create-student',
-  // auth(USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
     upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
+    
     req.body = JSON.parse(req.body.data);
     next();
   },

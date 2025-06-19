@@ -28,6 +28,20 @@ const createStudentIntoDB = async ( file: any,password: string, payload: TStuden
   const admissionSemester = await AcademicSemester.findById(
     payload.admissionSemester,
   );
+  
+  if (!admissionSemester) {
+    throw new AppError(400, 'Admission semester not found');
+  }
+
+  // find department
+  const academicDepartment = await AcademicDepartment.findById(
+    payload.academicDepartment,
+  );
+
+  if (!academicDepartment) {
+    throw new AppError(400, 'Aademic department not found');
+  }
+  payload.academicFaculty = academicDepartment.academicFaculty;
 
   const session = await mongoose.startSession(); // সেশন তৈরি
   try {
@@ -36,11 +50,14 @@ const createStudentIntoDB = async ( file: any,password: string, payload: TStuden
     // ম্যানুয়ালি আইডি জেনারেট করা
     userData.id = await generateStudentId(admissionSemester!);
 
-    // Image তৈরী করার জন্য 
+    if(file){
+      // Image তৈরী করার জন্য 
     const imageName = `${userData.id}${payload?.name?.firstName}`; // image এর নাম
     const path = file?.path;
     //send image to cloudinary
-    const { secure_url } = await sendImageToCloudinary(imageName, path) as { secure_url: string };
+    const { secure_url } = await sendImageToCloudinary(imageName, path) ;
+      payload.profileImg = secure_url as string;
+    }
     
 
     // ইউজার তৈরি [ট্রানজেকশন - ১]
@@ -52,7 +69,7 @@ const createStudentIntoDB = async ( file: any,password: string, payload: TStuden
     // স্টুডেন্টের জন্য রেফারেন্স সেট করা
     payload.id = newUser[0].id; // অ্যারে থেকে প্রথম আইটেম
     payload.user = newUser[0]._id;
-    payload.profileImg = secure_url;
+  
 
     // স্টুডেন্ট তৈরি [ট্রানজেকশন - ২]
     const newStudent = await Student.create([payload], { session });
@@ -70,7 +87,7 @@ const createStudentIntoDB = async ( file: any,password: string, payload: TStuden
   }
 };
 
-const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
+const createFacultyIntoDB = async (password: string, payload: TFaculty,file:any) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -97,6 +114,15 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
     session.startTransaction();
     //set  generated id
     userData.id = await generateFacultyId();
+      if(file){
+      // Image তৈরী করার জন্য 
+    const imageName = `${userData.id}${payload?.name?.firstName}`; // image এর নাম
+    const path = file?.path;
+    //send image to cloudinary
+    const { secure_url } = await sendImageToCloudinary(imageName, path) ;
+      payload.profileImg = secure_url as string;
+    }
+    
 
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session }); // array
@@ -128,7 +154,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   }
 };
 
-const createAdminIntoDB = async (password: string, payload: TFaculty) => {
+const createAdminIntoDB = async (password: string, payload: TFaculty, file:any) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -146,6 +172,15 @@ const createAdminIntoDB = async (password: string, payload: TFaculty) => {
     session.startTransaction();
     //set  generated id
     userData.id = await generateAdminId();
+      if(file){
+      // Image তৈরী করার জন্য 
+    const imageName = `${userData.id}${payload?.name?.firstName}`; // image এর নাম
+    const path = file?.path;
+    //send image to cloudinary
+    const { secure_url } = await sendImageToCloudinary(imageName, path) ;
+      payload.profileImg = secure_url as string;
+    }
+    
 
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
