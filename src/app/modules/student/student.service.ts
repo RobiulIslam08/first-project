@@ -99,9 +99,9 @@ const getAllStudentFromDB = async (query: Record<string, unknown>) => {
 
 const getSingleStudentFromDB = async (id: string) => {
   const result = await Student.findById(id)
-    .populate('admissionDepartment') // Populate admissionDepartment
+    .populate('academicDepartment') // Populate admissionDepartment
     .populate({
-      path: 'admissionDepartment', // Ensure admissionDepartment contains academicFaculty
+      path: 'academicDepartment', // Ensure admissionDepartment contains academicFaculty
       populate: {
         path: 'academicFaculty',
         model: 'AcademicFaculty', // Explicitly specify the model
