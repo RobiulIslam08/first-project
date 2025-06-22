@@ -12,6 +12,7 @@ import { SemesterRegistration } from '../semsterRegistration/semesterRegistratio
 import { hasTimeConflict } from './OfferedCourse.utils';
 
 import status from 'http-status';
+import { Student } from '../student/student.module';
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
     semesterRegistration,
@@ -77,45 +78,48 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   // check if the department belong is belong to the faculty
   const isDepartmentBelongToFaculty = await AcademicDepartment.findOne({
     academicFaculty,
-    _id:academicDepartment,
+    _id: academicDepartment,
   });
   if (!isDepartmentBelongToFaculty) {
-		throw new AppError(status.NOT_FOUND, `This ${isAcademicDepartmentExits.name}  is not belong to this ${isAcademicFacultyExits.name}!`);
-	  }
-    // check if the same offered course same section in same registered semester exists
+    throw new AppError(
+      status.NOT_FOUND,
+      `This ${isAcademicDepartmentExits.name}  is not belong to this ${isAcademicFacultyExits.name}!`,
+    );
+  }
+  // check if the same offered course same section in same registered semester exists
 
   const isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection =
-  await OfferedCourse.findOne({
+    await OfferedCourse.findOne({
+      semesterRegistration,
+      course,
+      section,
+    });
+
+  if (isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `Offered course with same section is already exist!`,
+    );
+  }
+  // get the schedules of the faculties
+  const assignedSchedules = await OfferedCourse.find({
     semesterRegistration,
-    course,
-    section,
-  });
+    faculty,
+    days: { $in: days },
+  }).select('days startTime endTime');
 
-if (isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection) {
-  throw new AppError(
-    status.BAD_REQUEST,
-    `Offered course with same section is already exist!`,
-  );
-}
- // get the schedules of the faculties
- const assignedSchedules = await OfferedCourse.find({
-  semesterRegistration,
-  faculty,
-  days: { $in: days },
-}).select('days startTime endTime');
+  const newSchedule = {
+    days,
+    startTime,
+    endTime,
+  };
 
-const newSchedule = {
-  days,
-  startTime,
-  endTime,
-};
-
-if (hasTimeConflict(assignedSchedules, newSchedule)) {
-  throw new AppError(
-    status.CONFLICT,
-    `This faculty is not available at that time ! Choose other time or day`,
-  );
-}
+  if (hasTimeConflict(assignedSchedules, newSchedule)) {
+    throw new AppError(
+      status.CONFLICT,
+      `This faculty is not available at that time ! Choose other time or day`,
+    );
+  }
   const result = await OfferedCourse.create({ ...payload, academicSemester });
   return result;
 };
@@ -128,7 +132,223 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await offeredCourseQuery.modelQuery;
-  return result;
+  const meta = await offeredCourseQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
+};
+const getMyOfferedCoursesFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  //pagination setup
+
+  const page = Number(query?.page) || 1;
+  const limit = Number(query?.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const student = await Student.findOne({ id: userId });
+  // find the student
+  if (!student) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User is not found');
+  }
+
+  //find current ongoing semester
+  const currentOngoingRegistrationSemester = await SemesterRegistration.findOne(
+    {
+      status: 'ONGOING',
+    },
+  );
+
+  if (!currentOngoingRegistrationSemester) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'There is no ongoing semester registration!',
+    );
+  }
+
+  const aggregationQuery = [
+    {
+      $match: {
+        semesterRegistration: currentOngoingRegistrationSemester?._id,
+        academicFaculty: student.academicFaculty,
+        academicDepartment: student.academicDepartment,
+      },
+    },
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'course',
+      },
+    },
+    {
+      $unwind: '$course',
+    },
+    {
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          currentOngoingRegistrationSemester:
+            currentOngoingRegistrationSemester._id,
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: [
+                      '$semesterRegistration',
+                      '$$currentOngoingRegistrationSemester',
+                    ],
+                  },
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isEnrolled', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'enrolledCourses',
+      },
+    },
+    {
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isCompleted', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'completedCourses',
+      },
+    },
+    {
+      $addFields: {
+        completedCourseIds: {
+          $map: {
+            input: '$completedCourses',
+            as: 'completed',
+            in: '$$completed.course',
+          },
+        },
+      },
+    },
+    // {
+    //   $addFields: {
+    //     isPreRequisitesFulFilled: {
+    //       $or: [
+    //         { $eq: ['$course.preRequisiteCourses', []] },
+    //         {
+    //           $setIsSubset: [
+    //             '$course.preRequisiteCourses.course',
+    //             '$completedCourseIds',
+    //           ],
+    //         },
+    //       ],
+    //     },
+
+    //     isAlreadyEnrolled: {
+    //       $in: [
+    //         '$course._id',
+    //         {
+    //           $map: {
+    //             input: '$enrolledCourses',
+    //             as: 'enroll',
+    //             in: '$$enroll.course',
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   },
+    // },
+    {
+  $addFields: {
+    isPreRequisitesFulFilled: {
+      $or: [
+        { $eq: [{ $ifNull: ['$course.preRequisiteCourses', []] }, []] }, // <-- আরও ভালো চেকের জন্য পরিবর্তন করা যেতে পারে
+        {
+          $setIsSubset: [
+            // $ifNull ব্যবহার করে নিশ্চিত করা হচ্ছে যে এটি সবসময় একটি অ্যারে পাবে
+            { $ifNull: ['$course.preRequisiteCourses.course', []] },
+            '$completedCourseIds',
+          ],
+        },
+      ],
+    },
+
+    isAlreadyEnrolled: {
+      $in: [
+        '$course._id',
+        {
+          $map: {
+            input: '$enrolledCourses',
+            as: 'enroll',
+            in: '$$enroll.course',
+          },
+        },
+      ],
+    },
+  },
+},
+    {
+      $match: {
+        isAlreadyEnrolled: false,
+        isPreRequisitesFulFilled: true,
+      },
+    },
+  ];
+
+  const paginationQuery = [
+    {
+      $skip: skip,
+    },
+    {
+      $limit: limit,
+    },
+  ];
+
+  const result = await OfferedCourse.aggregate([
+    ...aggregationQuery,
+    ...paginationQuery,
+  ]);
+
+  const total = (await OfferedCourse.aggregate(aggregationQuery)).length;
+
+  const totalPage = Math.ceil(result.length / limit);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage,
+    },
+    result,
+  };
+  // return null;
 };
 
 const getSingleOfferedCourseFromDB = async (id: string) => {
@@ -241,4 +461,5 @@ export const OfferedCourseServices = {
   getSingleOfferedCourseFromDB,
   deleteOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
+  getMyOfferedCoursesFromDB,
 };
