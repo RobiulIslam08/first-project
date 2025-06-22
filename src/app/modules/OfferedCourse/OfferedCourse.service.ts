@@ -348,7 +348,7 @@ const getMyOfferedCoursesFromDB = async (
     },
     result,
   };
-  // return null;
+
 };
 
 const getSingleOfferedCourseFromDB = async (id: string) => {
